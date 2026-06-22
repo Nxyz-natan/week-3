@@ -48,3 +48,29 @@ async def add_task(body: TaskBody):
     tasks.append(new_task)
     save_tasks(tasks)
     return new_task
+
+@app.patch("/tasks/{task_id}/complete")
+async def complete_task(task_id: int):
+    tasks = load_tasks()
+    for task in tasks:
+        if task["id"] == task_id:
+            task["done"] = True
+            save_tasks(tasks)
+            return task 
+    raise HTTPException(status_code=404, detail="Task not found")
+
+@app.delete("/tasks/{task_id}")
+async def delete_task(task_id: int):
+    tasks = load_tasks()
+    new_tasks = [t for t in tasks if t["id"] != task_id]
+    if len(new_tasks) == len(tasks):
+        raise HTTPException(status_code=404, detail="Task not found")
+    save_tasks(new_tasks)
+    return {"message": f"Task {task_id} deleted"}
+
+def main():
+    import uvicorn
+    uvicorn.run("resolution_week3_nxyz109.main:app", host="127.0.0.1", port=8000)
+
+if __name__ == "__main__":
+    main()
